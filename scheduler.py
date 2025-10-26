@@ -8,10 +8,11 @@ import schedule
 import time
 import asyncio
 import logging
+import threading
 from datetime import datetime
 from appfolio_scraper import AppFolioScraper
-from import_to_wordpress import WordPressImporter
 from wordpress_json_export import export_to_wordpress_json
+from api_server import app
 
 # Configure logging
 logging.basicConfig(
@@ -24,9 +25,8 @@ logging.basicConfig(
 )
 
 class PropertyScheduler:
-    def __init__(self, wp_url: str, wp_username: str, wp_password: str):
+    def __init__(self):
         self.scraper = AppFolioScraper()
-        self.importer = WordPressImporter(wp_url, wp_username, wp_password)
         self.last_update = None
         
     async def update_properties(self):
@@ -44,15 +44,11 @@ class PropertyScheduler:
                 # Export to WordPress-compatible format
                 wp_json_file = export_to_wordpress_json(properties, "wordpress_properties.json")
                 
-                # Import to WordPress (if WordPress URL is configured)
-                try:
-                    self.importer.import_properties(json_file)
-                except Exception as e:
-                    logging.warning(f"WordPress import failed (may be intentional): {e}")
-                
                 self.last_update = datetime.now()
                 logging.info(f"Successfully updated {len(properties)} properties at {self.last_update}")
+                logging.info(f"Properties JSON saved to: {json_file}")
                 logging.info(f"WordPress JSON saved to: {wp_json_file}")
+                logging.info("Properties are now available via API at /api/properties")
             else:
                 logging.warning("No properties were scraped in this update")
                 
@@ -83,6 +79,13 @@ class PropertyScheduler:
             time.sleep(60)  # Check every minute
 
 
+def start_api_server():
+    """Start the Flask API server in a separate thread"""
+    import os
+    port = int(os.environ.get('PORT', 8000))
+    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
+
+
 def main():
     import os
     from dotenv import load_dotenv
@@ -90,15 +93,13 @@ def main():
     # Load environment variables
     load_dotenv()
     
-    # Configuration - Get from environment variables
-    wp_url = os.getenv('WP_URL', 'https://farmersathens.com')
-    wp_username = os.getenv('WP_USERNAME', 'admin')
-    wp_password = os.getenv('WP_PASSWORD', 'password')
+    # Initialize scheduler
+    scheduler = PropertyScheduler()
     
-    logging.info(f"Configuration loaded - WP_URL: {wp_url}")
-    
-    # Initialize and start scheduler
-    scheduler = PropertyScheduler(wp_url, wp_username, wp_password)
+    # Start API server in a separate thread
+    api_thread = threading.Thread(target=start_api_server, daemon=True)
+    api_thread.start()
+    logging.info("API server started in background thread")
     
     try:
         scheduler.start_scheduler()
