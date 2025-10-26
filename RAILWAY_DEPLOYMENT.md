@@ -44,11 +44,17 @@ git push -u origin main
 
 ### 1.4 Configure Scraper Service
 
-1. **Set the start command**:
+1. **Configure Build and Deploy**:
+   - Go to Settings → Build
+   - **IMPORTANT**: Leave "Custom Build Command" EMPTY (or use default)
+   - Railway will automatically use the Dockerfile for building
+   
+2. **Set the start command**:
    - Go to Settings → Deploy
-   - Set Start Command: `python scheduler.py`
+   - Set Custom Start Command: `python scheduler.py`
+   - Or leave it empty to use the Dockerfile CMD directive
 
-2. **Add environment variables**:
+3. **Add environment variables**:
    - Go to Variables tab
    - Add these variables:
      ```

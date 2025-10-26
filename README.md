@@ -50,8 +50,10 @@ The scraper creates two JSON files:
 This service is designed to run on Railway.app:
 
 1. Deploy from GitHub
-2. Set start command: `python scheduler.py`
-3. Add environment variables
-4. Deploy!
+2. **Important**: Railway will automatically detect the Dockerfile and use it
+3. **DO NOT** set a Custom Build Command (leave it empty/default)
+4. Set Custom Start Command to: `python scheduler.py` (or leave empty to use Dockerfile CMD)
+5. Add environment variables
+6. Deploy!
 
 See `/RAILWAY_DEPLOYMENT.md` for detailed instructions.
