@@ -84,10 +84,18 @@ class PropertyScheduler:
 
 
 def main():
-    # Configuration - Update these with your actual WordPress credentials
-    wp_url = "https://farmersathens.com"
-    wp_username = "admin"  # Replace with actual username
-    wp_password = "password"  # Replace with actual password
+    import os
+    from dotenv import load_dotenv
+    
+    # Load environment variables
+    load_dotenv()
+    
+    # Configuration - Get from environment variables
+    wp_url = os.getenv('WP_URL', 'https://farmersathens.com')
+    wp_username = os.getenv('WP_USERNAME', 'admin')
+    wp_password = os.getenv('WP_PASSWORD', 'password')
+    
+    logging.info(f"Configuration loaded - WP_URL: {wp_url}")
     
     # Initialize and start scheduler
     scheduler = PropertyScheduler(wp_url, wp_username, wp_password)
