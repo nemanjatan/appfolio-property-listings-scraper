@@ -44,9 +44,6 @@ RUN playwright install chromium
 # Copy application code
 COPY . .
 
-# Set environment variable for Playwright
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-
 # Run the scheduler
 CMD ["python", "scheduler.py"]
 
