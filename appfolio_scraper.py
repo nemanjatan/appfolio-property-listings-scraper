@@ -19,9 +19,10 @@ from playwright.async_api import async_playwright
 
 
 class AppFolioScraper:
-    def __init__(self, base_url: str = "https://cityblockprop.appfolio.com"):
+    def __init__(self, base_url: str = "https://cityblockprop.appfolio.com", max_properties: int = None):
         self.base_url = base_url
         self.listings_url = f"{base_url}/listings"
+        self.max_properties = max_properties
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -84,10 +85,16 @@ class AppFolioScraper:
                 
                 print(f"Found {len(property_links)} property links")
                 
+                # Apply max_properties limit if set
+                links_to_scrape = property_links
+                if self.max_properties:
+                    links_to_scrape = property_links[:self.max_properties]
+                    print(f"Limiting to {self.max_properties} properties")
+                
                 # Scrape each property
                 properties = []
-                for i, link in enumerate(property_links[:10]):  # Limit to 10 for demo
-                    print(f"Scraping property {i+1}/{min(10, len(property_links))}: {link}")
+                for i, link in enumerate(links_to_scrape):
+                    print(f"Scraping property {i+1}/{len(links_to_scrape)}: {link}")
                     try:
                         property_data = await self.scrape_property_detail(page, link)
                         if property_data:

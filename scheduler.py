@@ -26,7 +26,10 @@ logging.basicConfig(
 
 class PropertyScheduler:
     def __init__(self):
-        self.scraper = AppFolioScraper()
+        import os
+        max_properties = os.getenv('MAX_PROPERTIES')
+        max_properties = int(max_properties) if max_properties else None
+        self.scraper = AppFolioScraper(max_properties=max_properties)
         self.last_update = None
         
     async def update_properties(self):
